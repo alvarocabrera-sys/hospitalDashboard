@@ -5,8 +5,8 @@ import {
     ensureHospitalConsultTable,
     getIncrementalAfterIsoForIngestion,
     refreshIngestionCheckpointFromFact
-} from './hospitalConsultTable';
-import { INTERNAL_CONSULT_HOSPITAL_CODE, INTERNAL_CONSULT_HOSPITAL_NAME } from './internalConsultHospital';
+} from './hospitalConsultTable.js';
+import { INTERNAL_CONSULT_HOSPITAL_CODE, INTERNAL_CONSULT_HOSPITAL_NAME } from './internalConsultHospital.js';
 
 // --- Types ---
 

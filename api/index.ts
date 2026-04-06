@@ -4,9 +4,9 @@ import crypto from 'crypto';
 import { Client } from 'pg';
 import dotenv from 'dotenv';
 import path from 'path';
-import { CONSULT_FACT_HOSPITAL_TABLE, ensureHospitalConsultTable } from '../server/lib/hospitalConsultTable';
-import { SQL_EXCLUDE_INTERNAL_HOSPITAL_CONSULTS } from '../server/lib/internalConsultHospital';
-import { runIngestionPasses } from '../server/lib/ingestion';
+import { CONSULT_FACT_HOSPITAL_TABLE, ensureHospitalConsultTable } from '../server/lib/hospitalConsultTable.js';
+import { SQL_EXCLUDE_INTERNAL_HOSPITAL_CONSULTS } from '../server/lib/internalConsultHospital.js';
+import { runIngestion, runIngestionPasses } from '../server/lib/ingestion.js';
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
@@ -1118,13 +1118,11 @@ router.post('/ingest', async (req, res) => {
             hasCursor && incrementalExplicit
                 ? { phase: incrementalPhase as 'created' | 'modified', cursor: cursorValue }
                 : undefined;
-        const result = await import('../server/lib/ingestion').then(m =>
-            m.runIngestion(token, dbUrl, maxDurationMs, {
-                forceFullSync,
-                startCursor: incrementalResume ? 0 : cursorValue,
-                incrementalResume
-            })
-        );
+        const result = await runIngestion(token, dbUrl, maxDurationMs, {
+            forceFullSync,
+            startCursor: incrementalResume ? 0 : cursorValue,
+            incrementalResume
+        });
         res.json({ message: "Ingestion complete", ...result });
     } catch (err) {
         console.error(err);
