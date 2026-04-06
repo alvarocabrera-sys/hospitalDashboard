@@ -1,0 +1,20 @@
+{
+	"geolocation": {
+		"data": {
+			"city": "Barranquilla",
+			"country": {
+				"code": "CO",
+				"name": "Colombia"
+			},
+			"subdivision": {
+				"code": "ATL",
+				"name": "Atlántico"
+			},
+			"timezone": "America/Bogota",
+			"latitude": 10.9711,
+			"longitude": -74.7837,
+			"postalCode": "080001"
+		},
+		"timestamp": 1775076190645
+	}
+}

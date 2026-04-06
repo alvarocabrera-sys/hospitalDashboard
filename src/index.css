@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light;
+
+  /* Background */
+  --bg-app: #f6f8fb;
+  --bg-surface: #ffffff;
+  --bg-hover: #f1f5f9;
+  --border-color: #e2e8f0;
+
+  /* Brand orange */
+  --color-primary: #ff6a1a;
+  --color-primary-hover: #ff8a3d;
+  --color-primary-soft: #ffb26b;
+  --color-primary-active: #e85a0f;
+
+  /* Blues (data + charts) */
+  --blue-primary: #2563eb;
+  --blue-secondary: #38bdf8;
+  --blue-soft: #60a5fa;
+
+  /* Text */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+
+  /* Status */
+  --success: #22c55e;
+  --warning: #facc15;
+  --danger: #f43f5e;
+  --info: #38bdf8;
+
+  /* Chart / viz neutral (slate within palette) */
+  --color-data-neutral: #64748b;
+
+  /* Focus ring (primary brand) */
+  --focus-ring: 0 0 0 2px rgba(255, 106, 26, 0.35);
+
+  /* Card elevation (light mode) */
+  --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+@layer base {
+  body {
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+    background: var(--bg-app);
+    color: var(--text-primary);
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  [role='button']:focus-visible,
+  input:focus-visible,
+  select:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+}
+
+@layer utilities {
+  .transition-dashboard {
+    transition: all 0.2s ease;
+  }
+
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+}

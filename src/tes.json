@@ -1,0 +1,475 @@
+{
+    "request": {
+        "url": "https://api.us.asurion.com/servicebench/inventory/facilities/v1/externalinventoryfeed",
+        "method": "POST",
+        "params": {
+            "serviceProviderId": "1134603639",
+            "spLocationNumber": "1134603639",
+            "partLocationNumber": "1134603639",
+            "inventoryPartsList": [
+                {
+                    "partNumber": "APA-IPH15P-BGR-YEL-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH14P-BGR-WHT-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH16PRO-BGR-NAT-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH13PRM-2000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH12-1000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH12M-1000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH12PM-1000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA4146-BLK-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH15-BGR-YEL-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH14-BGR-WHT-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA4145-BLK-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH14P-BGR-BLU-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH14-BGR-RED-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH14P-BGR-PUR-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH11PRO-2000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH14PRO-1000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH15PRM-BGR-NAT-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH14P-1000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH17PRM-2000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH15-BGR-BLK-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH16-BGR-PNK-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH14-BGR-PUR-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH15P-BGR-BLU-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH17PRO-2000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH13M-1000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH16-BGR-WHT-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH15P-BGR-BLK-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH15P-BGR-GRN-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH16PRO-2000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH12PRM-2000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH16-BGR-BLU-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH16-BGR-BLK-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH15P-1000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH16PRM-1000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH15-BGR-PNK-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH16-2000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH11-2000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH16PRM-BGR-WHT-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH15PRO-BGR-BLU-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH15-1000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH16-BGR-GRN-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH16P-2000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH13-2000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH15-BGR-GRN-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH14PRM-1000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH14P-BGR-RED-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH16PRO-BGR-BLK-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH14PRM-2000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH14-BGR-BLK-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH16P-1000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH16PRO-BGR-WHT-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH13MN-2000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH15PRM-2000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH15-BGR-BLU-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH14-BGR-BLU-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH16PRM-BGR-BLK-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH15PRM-BGR-WHT-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH15PRO-BGR-BLK-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH15PRO-BGR-NAT-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH14P-BGR-BLK-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH17PRO-1000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH14-2000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH13PM-1000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH15P-BGR-PNK-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH15PRM-BGR-BLU-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH11PRM-2000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH17PRM-1000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH15PRM-BGR-BLK-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH14P-2000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH16PRO-1000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA4147-BLK-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH16PRM-2000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH16PRM-BGR-NAT-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH15-2000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH14PRO-2000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH16PRM-BGR-BRZ-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH15PRM-1000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH14-1000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH17-2000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH15PRO-1000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH17-1000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH16-1000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH15PRO-BGR-WHT-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH13-1000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH15P-2000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH12MN-2000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH12-2000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH13PRO-2000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH12P-1000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH15PRO-2000-KIT",
+                    "quantityInStock": "10",
+                    "quantityAvailable": "10"
+                },
+                {
+                    "partNumber": "APA-IPH13P-1000-KIT",
+                    "quantityInStock": "8",
+                    "quantityAvailable": "8"
+                }
+            ],
+            "serviceAdministratorId": "43"
+        }
+    },
+    "response": {
+        "result": {
+            "message": "Message sent successfully"
+        },
+        "status": 200
+    }
+}
