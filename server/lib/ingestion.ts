@@ -735,12 +735,17 @@ export interface IngestionPassSummary {
     lastTimedOut: boolean;
     nextCursor: number;
     incrementalResume?: { phase: IncrementalIngestionPhase; cursor: number };
+    /** True when stopped early to stay under a serverless wall-clock limit (e.g. Vercel maxDuration). */
+    wallBudgetExceeded?: boolean;
 }
 
 /**
  * Run ingestion in a loop until Bubble queue is drained or max passes.
  * Continues using incrementalResume (modified/created phase + cursor) or nextCursor for full sync.
  */
+const CRON_HTTP_RESPONSE_MARGIN_MS = 8000;
+const CRON_MIN_PASS_MS = 5000;
+
 export const runIngestionPasses = async (
     bubbleToken: string,
     dbUrl: string,
@@ -750,6 +755,11 @@ export const runIngestionPasses = async (
         maxPasses?: number;
         startCursor?: number;
         incrementalResume?: { phase: IncrementalIngestionPhase; cursor: number };
+        /**
+         * Total wall time for this invocation (ms). When set, each pass uses
+         * min(perPassMaxDurationMs, remainingBudget) so serverless functions return before the platform timeout.
+         */
+        maxTotalWallMs?: number;
     } = {}
 ): Promise<IngestionPassSummary> => {
     const maxPasses = options.maxPasses ?? 20;
@@ -760,9 +770,28 @@ export const runIngestionPasses = async (
     let passes = 0;
     let remaining = 1;
     let lastTimedOut = false;
+    let wallBudgetExceeded = false;
+
+    const wallStart = Date.now();
+    const maxTotalWallMs = options.maxTotalWallMs;
 
     while (passes < maxPasses && remaining > 0) {
-        const result = await runIngestion(bubbleToken, dbUrl, perPassMaxDurationMs, {
+        let thisPassMs = perPassMaxDurationMs;
+        if (maxTotalWallMs !== undefined) {
+            const elapsed = Date.now() - wallStart;
+            const remainingWall = maxTotalWallMs - elapsed;
+            if (remainingWall <= CRON_HTTP_RESPONSE_MARGIN_MS) {
+                wallBudgetExceeded = true;
+                break;
+            }
+            thisPassMs = Math.min(perPassMaxDurationMs, remainingWall - CRON_HTTP_RESPONSE_MARGIN_MS);
+            if (thisPassMs < CRON_MIN_PASS_MS) {
+                wallBudgetExceeded = true;
+                break;
+            }
+        }
+
+        const result = await runIngestion(bubbleToken, dbUrl, thisPassMs, {
             forceFullSync: options.forceFullSync === true,
             startCursor: incrementalResume ? 0 : cursor,
             incrementalResume
@@ -789,6 +818,7 @@ export const runIngestionPasses = async (
         remaining,
         lastTimedOut,
         nextCursor: cursor,
-        incrementalResume
+        incrementalResume,
+        ...(wallBudgetExceeded ? { wallBudgetExceeded: true } : {})
     };
 };

@@ -536,7 +536,19 @@ router.get('/cron/ingest', async (req, res) => {
         const configuredMaxPasses = Number(process.env.INGEST_SCHEDULE_MAX_PASSES ?? '12');
         const maxPasses = Number.isFinite(configuredMaxPasses) ? Math.min(40, Math.max(1, configuredMaxPasses)) : 12;
 
-        const summary = await runIngestionPasses(token, dbUrl, perPassMs, { maxPasses });
+        /** Stay under Vercel `functions.*.maxDuration` (seconds); default 280s with margin before 300s kill. */
+        const defaultCronWallMs = 280_000;
+        const parsedCronWall = Number(process.env.CRON_INGEST_MAX_WALL_MS ?? String(defaultCronWallMs));
+        const maxTotalWallMs = Number.isFinite(parsedCronWall)
+            ? Math.min(295_000, Math.max(30_000, parsedCronWall))
+            : defaultCronWallMs;
+
+        const summary = await runIngestionPasses(token, dbUrl, perPassMs, { maxPasses, maxTotalWallMs });
+        if (summary.wallBudgetExceeded) {
+            console.warn(
+                '[cron/ingest] stopped before max passes: wall budget (remaining work will continue on next cron tick)'
+            );
+        }
         console.log('[cron/ingest] scheduled ingestion summary:', summary);
         res.json({ ok: true, ...summary });
     } catch (err) {

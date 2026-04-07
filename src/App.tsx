@@ -15,6 +15,7 @@ interface SessionResponse {
 
 const API_BASE = '/api';
 const AUTH_TOKEN_STORAGE_KEY = 'ps_dashboard_auth_token';
+const AUTH_REQUEST_TIMEOUT_MS = 12000;
 
 const getStoredAuthToken = () => {
     if (typeof window === 'undefined') {
@@ -162,11 +163,17 @@ function App() {
     useEffect(() => {
         let cancelled = false;
         applyAuthToken(authToken);
+        const stuckGuard = window.setTimeout(() => {
+            if (!cancelled) {
+                setCheckingSession(false);
+            }
+        }, AUTH_REQUEST_TIMEOUT_MS + 3000);
 
         const checkSession = async () => {
             try {
                 const response = await axios.get<SessionResponse>(`${API_BASE}/auth/session`, {
-                    validateStatus: () => true
+                    validateStatus: () => true,
+                    timeout: AUTH_REQUEST_TIMEOUT_MS
                 });
 
                 if (cancelled) return;
@@ -194,6 +201,7 @@ function App() {
 
         return () => {
             cancelled = true;
+            window.clearTimeout(stuckGuard);
         };
     }, [authToken]);
 
@@ -217,7 +225,10 @@ function App() {
             const response = await axios.post<LoginResponse>(
                 `${API_BASE}/auth/login`,
                 { password },
-                { validateStatus: () => true }
+                {
+                    validateStatus: () => true,
+                    timeout: AUTH_REQUEST_TIMEOUT_MS
+                }
             );
 
             if (response.status === 200) {
@@ -231,7 +242,8 @@ function App() {
                 persistAuthToken(nextToken);
 
                 const sessionResponse = await axios.get<SessionResponse>(`${API_BASE}/auth/session`, {
-                    validateStatus: () => true
+                    validateStatus: () => true,
+                    timeout: AUTH_REQUEST_TIMEOUT_MS
                 });
 
                 if (sessionResponse.status === 200 && sessionResponse.data?.authenticated === true) {
