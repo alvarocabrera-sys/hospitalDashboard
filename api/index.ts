@@ -28,7 +28,28 @@ const PUBLIC_ROUTE_PATHS = new Set(['/auth/login', '/auth/session', '/auth/logou
 const hospitalEntityGroupExpr = `COALESCE(NULLIF(TRIM(hospital_ref), ''), NULLIF(TRIM(hospital_code), ''))`;
 
 const getClient = async () => {
-    const client = new Client({ connectionString: process.env.DATABASE_URL });
+    const connectionString = process.env.DATABASE_URL;
+    if (!connectionString) {
+        throw new Error('DATABASE_URL is not configured');
+    }
+
+    const configuredConnectTimeout = Number(process.env.PG_CONNECT_TIMEOUT_MS ?? '10000');
+    const connectionTimeoutMillis = Number.isFinite(configuredConnectTimeout)
+        ? Math.min(60000, Math.max(1000, Math.floor(configuredConnectTimeout)))
+        : 10000;
+
+    const configuredQueryTimeout = Number(process.env.PG_QUERY_TIMEOUT_MS ?? '15000');
+    const queryTimeoutMs = Number.isFinite(configuredQueryTimeout)
+        ? Math.min(120000, Math.max(1000, Math.floor(configuredQueryTimeout)))
+        : 15000;
+
+    const client = new Client({
+        connectionString,
+        connectionTimeoutMillis,
+        query_timeout: queryTimeoutMs,
+        statement_timeout: queryTimeoutMs,
+        keepAlive: true
+    });
     await client.connect();
     await ensureHospitalConsultTable(client);
     return client;
@@ -420,9 +441,10 @@ router.get('/auth/session', (req, res) => {
 router.post('/auth/login', async (req, res) => {
     const password = typeof req.body?.password === 'string' ? req.body.password : '';
     const ipAddress = getClientIp(req);
-    const client = await getClient();
+    let client: Client | null = null;
 
     try {
+        client = await getClient();
         await ensureAuthTable(client);
         await client.query('BEGIN');
 
@@ -495,11 +517,15 @@ router.post('/auth/login', async (req, res) => {
         res.setHeader('Set-Cookie', buildSessionCookie(req, token));
         res.json({ authenticated: true, token });
     } catch (err) {
-        await client.query('ROLLBACK').catch(() => undefined);
+        if (client) {
+            await client.query('ROLLBACK').catch(() => undefined);
+        }
         console.error(err);
         res.status(500).json({ error: 'Unable to authenticate.' });
     } finally {
-        await client.end();
+        if (client) {
+            await client.end();
+        }
     }
 });
 
