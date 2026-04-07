@@ -1,9 +1,11 @@
-import type { Client } from 'pg';
+import type { Client, PoolClient } from 'pg';
+
+type DbClient = Client | PoolClient;
 
 /** Hospital-dashboard ingest + analytics only (store app keeps using `consult_fact`). */
 export const CONSULT_FACT_HOSPITAL_TABLE = 'consult_fact_hospital';
 
-export const ensureHospitalConsultTable = async (client: Client): Promise<void> => {
+export const ensureHospitalConsultTable = async (client: DbClient): Promise<void> => {
     await client.query(`
         CREATE TABLE IF NOT EXISTS consult_fact_hospital (
             consult_id TEXT PRIMARY KEY,
@@ -56,7 +58,7 @@ export const ensureHospitalConsultTable = async (client: Client): Promise<void> 
     await backfillHospitalFromLegacy(client);
 };
 
-async function getLegacyConsultFactClaimColumn(client: Client): Promise<string | null> {
+async function getLegacyConsultFactClaimColumn(client: DbClient): Promise<string | null> {
     const result = await client.query<{ column_name: string }>(`
         SELECT column_name
         FROM information_schema.columns
@@ -81,7 +83,7 @@ async function getLegacyConsultFactClaimColumn(client: Client): Promise<string |
     return result.rows[0]?.column_name ?? null;
 }
 
-async function backfillHospitalFromLegacy(client: Client): Promise<void> {
+async function backfillHospitalFromLegacy(client: DbClient): Promise<void> {
     const legacy = await client.query<{ exists: boolean }>(`
         SELECT EXISTS (
             SELECT 1
@@ -158,7 +160,7 @@ async function backfillHospitalFromLegacy(client: Client): Promise<void> {
 /** Single-row table: timestamp after last successful Bubble consultation pull (incremental cursor). */
 export const HOSPITAL_INGESTION_CHECKPOINT_TABLE = 'hospital_ingestion_checkpoint';
 
-export const ensureIngestionCheckpointTable = async (client: Client): Promise<void> => {
+export const ensureIngestionCheckpointTable = async (client: DbClient): Promise<void> => {
     await client.query(`
         CREATE TABLE IF NOT EXISTS ${HOSPITAL_INGESTION_CHECKPOINT_TABLE} (
             id INTEGER PRIMARY KEY DEFAULT 1,
@@ -173,7 +175,7 @@ export const ensureIngestionCheckpointTable = async (client: Client): Promise<vo
  * When no checkpoint exists but fact rows do, seeds checkpoint from MAX(created, modified).
  */
 export const getIncrementalAfterIsoForIngestion = async (
-    client: Client,
+    client: DbClient,
     forceFullSync: boolean
 ): Promise<string | null> => {
     if (forceFullSync) {
@@ -218,7 +220,7 @@ export const getIncrementalAfterIsoForIngestion = async (
  * Sets checkpoint to the latest consult activity in the warehouse (created vs modified),
  * so the next incremental pull does not skip rows whose Bubble dates are behind wall clock.
  */
-export const refreshIngestionCheckpointFromFact = async (client: Client): Promise<void> => {
+export const refreshIngestionCheckpointFromFact = async (client: DbClient): Promise<void> => {
     await ensureIngestionCheckpointTable(client);
     await client.query(`
         INSERT INTO ${HOSPITAL_INGESTION_CHECKPOINT_TABLE} (id, last_sync_at)

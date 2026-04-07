@@ -1,7 +1,7 @@
 import serverless from 'serverless-http';
 import express, { Router } from 'express';
 import crypto from 'crypto';
-import { Client } from 'pg';
+import { Pool, type PoolClient } from 'pg';
 import dotenv from 'dotenv';
 import path from 'path';
 import { CONSULT_FACT_HOSPITAL_TABLE, ensureHospitalConsultTable } from '../server/lib/hospitalConsultTable.js';
@@ -21,13 +21,18 @@ const AUTH_WINDOW_MS = 15 * 60 * 1000;
 const AUTH_BLOCK_MS = 30 * 60 * 1000;
 const AUTH_MAX_ATTEMPTS = 5;
 const PUBLIC_ROUTE_PATHS = new Set(['/auth/login', '/auth/session', '/auth/logout', '/ingest', '/cron/ingest']);
+type DbClient = PoolClient;
+
+let pool: Pool | null = null;
+let hospitalTableReady: Promise<void> | null = null;
+let authTableReady: Promise<void> | null = null;
 
 // --- DB Helper ---
 
 /** Prefer Bubble hospital id when present; else display code for legacy backfill rows. */
 const hospitalEntityGroupExpr = `COALESCE(NULLIF(TRIM(hospital_ref), ''), NULLIF(TRIM(hospital_code), ''))`;
 
-const getClient = async () => {
+const getPool = () => {
     const connectionString = process.env.DATABASE_URL;
     if (!connectionString) {
         throw new Error('DATABASE_URL is not configured');
@@ -43,16 +48,61 @@ const getClient = async () => {
         ? Math.min(120000, Math.max(1000, Math.floor(configuredQueryTimeout)))
         : 15000;
 
-    const client = new Client({
-        connectionString,
-        connectionTimeoutMillis,
-        query_timeout: queryTimeoutMs,
-        statement_timeout: queryTimeoutMs,
-        keepAlive: true
-    });
-    await client.connect();
-    await ensureHospitalConsultTable(client);
-    return client;
+    const configuredPoolMax = Number(process.env.PG_POOL_MAX ?? '4');
+    const max = Number.isFinite(configuredPoolMax)
+        ? Math.min(20, Math.max(1, Math.floor(configuredPoolMax)))
+        : 4;
+
+    if (!pool) {
+        pool = new Pool({
+            connectionString,
+            connectionTimeoutMillis,
+            query_timeout: queryTimeoutMs,
+            statement_timeout: queryTimeoutMs,
+            keepAlive: true,
+            max
+        });
+    }
+
+    return pool;
+};
+
+const ensureHospitalTableReady = async (client: DbClient) => {
+    if (!hospitalTableReady) {
+        hospitalTableReady = ensureHospitalConsultTable(client).catch((err) => {
+            hospitalTableReady = null;
+            throw err;
+        });
+    }
+    await hospitalTableReady;
+};
+
+const ensureAuthTableReady = async (client: DbClient) => {
+    if (!authTableReady) {
+        authTableReady = ensureAuthTable(client).catch((err) => {
+            authTableReady = null;
+            throw err;
+        });
+    }
+    await authTableReady;
+};
+
+const getClient = async () => {
+    const client = await getPool().connect();
+    try {
+        await ensureHospitalTableReady(client);
+        return client;
+    } catch (err) {
+        client.release();
+        throw err;
+    }
+};
+
+const releaseClient = (client: DbClient | null) => {
+    if (!client) {
+        return;
+    }
+    client.release();
 };
 
 interface ClaimColumnMeta {
@@ -69,7 +119,7 @@ interface AuthTokenPayload {
     exp?: number;
 }
 
-const getClaimedTimestampColumn = async (client: Client): Promise<ClaimColumnMeta | null> => {
+const getClaimedTimestampColumn = async (client: DbClient): Promise<ClaimColumnMeta | null> => {
     const result = await client.query<{ column_name: string; data_type: string }>(`
         SELECT column_name, data_type
         FROM information_schema.columns
@@ -103,7 +153,7 @@ const getClaimedTimestampColumn = async (client: Client): Promise<ClaimColumnMet
     };
 };
 
-const getConsultDateTimeColumn = async (client: Client): Promise<ConsultColumnMeta | null> => {
+const getConsultDateTimeColumn = async (client: DbClient): Promise<ConsultColumnMeta | null> => {
     const result = await client.query<{ column_name: string; data_type: string }>(`
         SELECT column_name, data_type
         FROM information_schema.columns
@@ -289,7 +339,7 @@ const getClientIp = (req: express.Request) => {
     return req.ip || 'unknown';
 };
 
-const ensureAuthTable = async (client: Client) => {
+const ensureAuthTable = async (client: DbClient) => {
     await client.query(`
         CREATE TABLE IF NOT EXISTS dashboard_auth_attempts (
             ip_address TEXT PRIMARY KEY,
@@ -441,11 +491,11 @@ router.get('/auth/session', (req, res) => {
 router.post('/auth/login', async (req, res) => {
     const password = typeof req.body?.password === 'string' ? req.body.password : '';
     const ipAddress = getClientIp(req);
-    let client: Client | null = null;
+    let client: DbClient | null = null;
 
     try {
         client = await getClient();
-        await ensureAuthTable(client);
+        await ensureAuthTableReady(client);
         await client.query('BEGIN');
 
         const attemptResult = await client.query<{
@@ -523,9 +573,7 @@ router.post('/auth/login', async (req, res) => {
         console.error(err);
         res.status(500).json({ error: 'Unable to authenticate.' });
     } finally {
-        if (client) {
-            await client.end();
-        }
+        releaseClient(client);
     }
 });
 
@@ -761,7 +809,7 @@ router.get('/metrics', async (req, res) => {
         console.error(err);
         res.status(500).json({ error: String(err) });
     } finally {
-        await client.end();
+        releaseClient(client);
     }
 });
 
@@ -784,7 +832,7 @@ router.get('/charts/volume', async (req, res) => {
         console.error(err);
         res.status(500).json({ error: String(err) });
     } finally {
-        await client.end();
+        releaseClient(client);
     }
 });
 
@@ -806,7 +854,7 @@ router.get('/filters/premium-tiers', async (_req, res) => {
         console.error(err);
         res.status(500).json({ error: String(err) });
     } finally {
-        await client.end();
+        releaseClient(client);
     }
 });
 
@@ -828,7 +876,7 @@ router.get('/filters/species', async (_req, res) => {
         console.error(err);
         res.status(500).json({ error: String(err) });
     } finally {
-        await client.end();
+        releaseClient(client);
     }
 });
 
@@ -856,7 +904,7 @@ router.get('/hospitals', async (req, res) => {
         console.error(err);
         res.status(500).json({ error: String(err) });
     } finally {
-        await client.end();
+        releaseClient(client);
     }
 });
 
@@ -884,7 +932,7 @@ router.get('/hospitals/trends', async (req, res) => {
         console.error(err);
         res.status(500).json({ error: String(err) });
     } finally {
-        await client.end();
+        releaseClient(client);
     }
 });
 
@@ -913,7 +961,7 @@ router.get('/hospitals/display', async (req, res) => {
         console.error(err);
         res.status(500).json({ error: String(err) });
     } finally {
-        await client.end();
+        releaseClient(client);
     }
 });
 
@@ -938,7 +986,7 @@ router.get('/species', async (req, res) => {
         console.error(err);
         res.status(500).json({ error: String(err) });
     } finally {
-        await client.end();
+        releaseClient(client);
     }
 });
 
@@ -980,7 +1028,7 @@ router.get('/charts/wait-time/daily', async (req, res) => {
         console.error(err);
         res.status(500).json({ error: String(err) });
     } finally {
-        await client.end();
+        releaseClient(client);
     }
 });
 
@@ -1024,7 +1072,7 @@ router.get('/charts/wait-time/species', async (req, res) => {
         console.error(err);
         res.status(500).json({ error: String(err) });
     } finally {
-        await client.end();
+        releaseClient(client);
     }
 });
 
@@ -1068,7 +1116,7 @@ router.get('/charts/wait-time/province', async (req, res) => {
         console.error(err);
         res.status(500).json({ error: String(err) });
     } finally {
-        await client.end();
+        releaseClient(client);
     }
 });
 
@@ -1186,7 +1234,7 @@ router.get('/consultations', async (req, res) => {
         console.error(err);
         res.status(500).json({ error: String(err) });
     } finally {
-        await client.end();
+        releaseClient(client);
     }
 });
 
