@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
-    { "source": "^/api/(?!handler(?:/|$))(.*)$", "destination": "/api/handler?path=$1" },
+    { "source": "^/api/(?!handler(?:/|$)|ping(?:/|$))(.*)$", "destination": "/api/handler?path=$1" },
     { "source": "/:path((?!api/).*)", "destination": "/index.html" }
   ],
   "crons": [
@@ -15,6 +15,9 @@
       "maxDuration": 300
     },
     "api/handler.ts": {
+      "maxDuration": 300
+    },
+    "api/ping.ts": {
       "maxDuration": 300
     }
   }

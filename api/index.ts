@@ -1,4 +1,3 @@
-import serverless from 'serverless-http';
 import express, { Router } from 'express';
 import crypto from 'crypto';
 import { Pool, type PoolClient } from 'pg';
@@ -1244,4 +1243,4 @@ app.use('/api', router);
 app.use(router);
 
 export { app };
-export default serverless(app);
+export default app;

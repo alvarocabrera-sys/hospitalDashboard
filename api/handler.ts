@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import expressHandler from './index.js';
+import { app } from './index.js';
 
 type MutableRequest = IncomingMessage & { url?: string };
 
@@ -18,5 +18,5 @@ export default async function handler(req: MutableRequest, res: ServerResponse) 
     const nextQuery = url.searchParams.toString();
     req.url = nextQuery ? `${nextPath}?${nextQuery}` : nextPath;
 
-    return expressHandler(req, res);
+    return app(req, res);
 }
