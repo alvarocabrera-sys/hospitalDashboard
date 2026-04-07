@@ -87,10 +87,12 @@ const ensureAuthTableReady = async (client: DbClient) => {
     await authTableReady;
 };
 
-const getClient = async () => {
+const getClient = async (options?: { ensureHospitalTable?: boolean }) => {
     const client = await getPool().connect();
     try {
-        await ensureHospitalTableReady(client);
+        if (options?.ensureHospitalTable !== false) {
+            await ensureHospitalTableReady(client);
+        }
         return client;
     } catch (err) {
         client.release();
@@ -494,7 +496,7 @@ router.post('/auth/login', async (req, res) => {
     let client: DbClient | null = null;
 
     try {
-        client = await getClient();
+        client = await getClient({ ensureHospitalTable: false });
         await ensureAuthTableReady(client);
         await client.query('BEGIN');
 
