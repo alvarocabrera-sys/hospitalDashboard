@@ -38,3 +38,4 @@ coverage/
 
 # Optional local tooling
 *.local
+.vercel
