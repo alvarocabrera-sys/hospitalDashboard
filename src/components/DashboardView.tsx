@@ -115,8 +115,9 @@ export const DashboardView = () => {
     const { data: speciesOptions = [] } = useSpeciesFilterOptions();
 
     const codesNeedingLabels = useMemo(() => {
-        if (!hospitals || !hospitalComparisons?.prevPeriodByHospital) {
-            return [];
+        const currentHospitalCodes = hospitals?.map((hospital) => hospital.hospital_code) ?? [];
+        if (!hospitalComparisons?.prevPeriodByHospital || !hospitals) {
+            return currentHospitalCodes;
         }
 
         const currentByHospital = new Map<string, number>();
@@ -129,7 +130,7 @@ export const DashboardView = () => {
             ...currentByHospital.keys()
         ]);
 
-        return [...hospitalCodes]
+        const decliningCodes = [...hospitalCodes]
             .map((hospitalCode) => {
                 const current = currentByHospital.get(hospitalCode) ?? 0;
                 const prevPeriod = hospitalComparisons.prevPeriodByHospital[hospitalCode] ?? 0;
@@ -154,6 +155,8 @@ export const DashboardView = () => {
             })
             .slice(0, HOSPITAL_CHECK_IN_MAX_ITEMS)
             .map((row) => row.hospitalCode);
+
+        return [...new Set([...currentHospitalCodes, ...decliningCodes])];
     }, [hospitals, hospitalComparisons]);
 
     const { data: hospitalDisplayByCode, isLoading: hospitalDisplayLoading } = useHospitalDisplayByCode(
@@ -434,6 +437,7 @@ export const DashboardView = () => {
                     <FullscreenFrame>
                         <StoreList
                             hospitals={hospitals}
+                            displayByCode={hospitalDisplayByCode}
                             loading={hospitalsLoading || (showHospitalComparisons && hospitalComparisonsLoading)}
                             comparisons={showHospitalComparisons ? hospitalComparisons : undefined}
                             showComparisonColumns={showHospitalComparisons}

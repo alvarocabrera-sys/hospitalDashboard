@@ -423,7 +423,7 @@ const buildWhereClause = (req: express.Request, options?: { includeDate?: boolea
     };
 };
 
-const MAX_HOSPITAL_DISPLAY_CODES = 150;
+const MAX_HOSPITAL_DISPLAY_CODES = 1000;
 
 /** Scope for label lookup: no date/hospital_code filter so names resolve from full history. */
 const buildHospitalDisplayWhereClause = (req: express.Request) => {

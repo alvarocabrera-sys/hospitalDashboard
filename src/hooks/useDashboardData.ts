@@ -370,7 +370,7 @@ export const useHospitalComparisons = (filters: DashboardFilters, enabled: boole
 };
 
 export const useHospitalDisplayByCode = (filters: DashboardFilters, codes: string[], enabled: boolean) => {
-    const uniqueCodes = [...new Set(codes.filter(Boolean))].slice(0, 150);
+    const uniqueCodes = [...new Set(codes.filter(Boolean))].slice(0, 1000);
     const codesKey = uniqueCodes.slice().sort().join('\u0001');
     return useQuery({
         queryKey: ['hospitals-display', serializeDashboardFilters(filters), codesKey],

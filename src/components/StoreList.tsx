@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import type { HospitalData, HospitalComparisonData } from '../types';
+import type { HospitalData, HospitalComparisonData, HospitalDisplayByCode } from '../types';
 import { formatNumber, hospitalDisplayPrimary, hospitalShowCodeSubtitle } from '../lib/utils';
 import { ChevronDown, ChevronUp, Search, Hospital as HospitalIcon } from 'lucide-react';
 import { useFullscreenFrame } from './FullscreenFrame';
 
 interface StoreListProps {
     hospitals?: HospitalData[];
+    displayByCode?: HospitalDisplayByCode;
     loading: boolean;
     comparisons?: HospitalComparisonData;
     showComparisonColumns?: boolean;
@@ -29,6 +30,7 @@ const getComparisonBadgeClasses = (currentVolume: number, comparisonVolume: numb
 
 export const StoreList = ({
     hospitals,
+    displayByCode,
     loading,
     comparisons,
     showComparisonColumns = false,
@@ -65,8 +67,10 @@ export const StoreList = ({
         .filter((s) => {
             if (!q) return true;
             if (s.hospital_code.toLowerCase().includes(q)) return true;
-            const internal = s.hospital_internal_name?.toLowerCase() ?? '';
-            return internal.includes(q);
+            const resolvedInternal = displayByCode?.[s.hospital_code]?.hospital_internal_name?.trim()
+                ?? s.hospital_internal_name?.trim()
+                ?? '';
+            return resolvedInternal.toLowerCase().includes(q);
         })
         .sort((a, b) => {
             const multi = sortDirection === 'asc' ? 1 : -1;
@@ -137,6 +141,11 @@ export const StoreList = ({
                     </thead>
                     <tbody className="divide-y divide-subtle">
                         {visibleHospitals.map((hospital) => {
+                            const resolvedHospital = {
+                                ...hospital,
+                                hospital_internal_name: displayByCode?.[hospital.hospital_code]?.hospital_internal_name?.trim()
+                                    ?? hospital.hospital_internal_name
+                            };
                             const currentVolume = Number(hospital.volume);
                             const percentage = maxVol > 0 ? (currentVolume / maxVol) * 100 : 0;
                             const prevPeriodVolume = comparisons?.prevPeriodByHospital?.[hospital.hospital_code];
@@ -150,10 +159,10 @@ export const StoreList = ({
                                                 <HospitalIcon className="h-4 w-4" />
                                             </div>
                                             <div className="min-w-0">
-                                                <div className="text-fg-primary truncate" title={hospitalDisplayPrimary(hospital)}>
-                                                    {hospitalDisplayPrimary(hospital)}
+                                                <div className="text-fg-primary truncate" title={hospitalDisplayPrimary(resolvedHospital)}>
+                                                    {hospitalDisplayPrimary(resolvedHospital)}
                                                 </div>
-                                                {hospitalShowCodeSubtitle(hospital) && (
+                                                {hospitalShowCodeSubtitle(resolvedHospital) && (
                                                     <div className="text-[11px] text-fg-muted font-normal truncate" title={`Code: ${hospital.hospital_code}`}>
                                                         Code: {hospital.hospital_code}
                                                     </div>
