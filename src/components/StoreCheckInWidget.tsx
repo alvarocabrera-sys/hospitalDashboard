@@ -5,6 +5,7 @@ import { useFullscreenFrame } from './FullscreenFrame';
 
 interface StoreCheckInWidgetProps {
     hospitals?: HospitalData[];
+    allHospitals?: HospitalData[];
     comparisons?: HospitalComparisonData;
     /** Resolved internal names for codes (from GET /hospitals/display), including non-top-10 hospitals */
     displayByCode?: HospitalDisplayByCode;
@@ -25,6 +26,7 @@ interface DecliningHospital {
 
 export const StoreCheckInWidget = ({
     hospitals,
+    allHospitals,
     comparisons,
     displayByCode,
     loading,
@@ -86,7 +88,9 @@ export const StoreCheckInWidget = ({
         const fromBatch = displayByCode?.[code]?.hospital_internal_name?.trim();
         if (fromBatch) return fromBatch;
         const fromTop = hospitals?.find((h) => h.hospital_code === code)?.hospital_internal_name?.trim();
-        return fromTop ?? null;
+        if (fromTop) return fromTop;
+        const fromCatalog = allHospitals?.find((h) => h.hospital_code === code)?.hospital_internal_name?.trim();
+        return fromCatalog || code;
     };
 
     if (loading) {
@@ -131,8 +135,8 @@ export const StoreCheckInWidget = ({
                                 const internal = internalNameFor(row.hospitalCode);
                                 return (
                                     <tr key={row.hospitalCode}>
-                                        <td className="py-2.5 pr-4 text-fg-primary font-medium min-w-0 max-w-[14rem] truncate" title={internal ?? ''}>
-                                            {internal || '—'}
+                                        <td className="py-2.5 pr-4 text-fg-primary font-medium min-w-0 max-w-[14rem] truncate" title={internal}>
+                                            {internal}
                                         </td>
                                         <td className="py-2.5 pr-4 font-mono text-fg-secondary whitespace-nowrap">{row.hospitalCode}</td>
                                         <td className="py-2.5 px-2 text-right font-mono text-fg-secondary">{formatNumber(row.current)}</td>

@@ -908,6 +908,32 @@ router.get('/hospitals', async (req, res) => {
     }
 });
 
+router.get('/hospitals/catalog', async (req, res) => {
+    const client = await getClient();
+    try {
+        const where = buildHospitalDisplayWhereClause(req);
+        const query = `
+            SELECT
+                MAX(hospital_code) as hospital_code,
+                MAX(hospital_internal_name) as hospital_internal_name,
+                MAX(province) as province,
+                MAX(premium_tier) as premium_tier
+            FROM ${CONSULT_FACT_HOSPITAL_TABLE}
+            ${where.text}
+              AND ${hospitalEntityGroupExpr} IS NOT NULL
+            GROUP BY ${hospitalEntityGroupExpr}
+            ORDER BY COALESCE(NULLIF(MAX(hospital_internal_name), ''), MAX(hospital_code)) ASC
+        `;
+        const result = await client.query(query, where.values);
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: String(err) });
+    } finally {
+        releaseClient(client);
+    }
+});
+
 router.get('/hospitals/trends', async (req, res) => {
     const client = await getClient();
     try {

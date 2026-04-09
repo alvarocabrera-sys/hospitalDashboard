@@ -6,6 +6,7 @@ import { useFullscreenFrame } from './FullscreenFrame';
 
 interface StoreListProps {
     hospitals?: HospitalData[];
+    searchHospitals?: HospitalData[];
     displayByCode?: HospitalDisplayByCode;
     loading: boolean;
     comparisons?: HospitalComparisonData;
@@ -30,6 +31,7 @@ const getComparisonBadgeClasses = (currentVolume: number, comparisonVolume: numb
 
 export const StoreList = ({
     hospitals,
+    searchHospitals,
     displayByCode,
     loading,
     comparisons,
@@ -52,6 +54,7 @@ export const StoreList = ({
 
     if (!hospitals) return null;
     const colSpan = 5 + (showComparisonColumns ? 1 : 0) + (showPrevYearColumn ? 1 : 0);
+    const hospitalsForSearch = searchHospitals ?? hospitals;
 
     const handleSort = (field: SortField) => {
         if (sortField === field) {
@@ -63,7 +66,7 @@ export const StoreList = ({
     };
 
     const q = search.toLowerCase();
-    const sortedHospitals = [...hospitals]
+    const sortedHospitals = [...(q ? hospitalsForSearch : hospitals)]
         .filter((s) => {
             if (!q) return true;
             if (s.hospital_code.toLowerCase().includes(q)) return true;

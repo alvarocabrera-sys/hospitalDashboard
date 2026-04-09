@@ -17,6 +17,7 @@ import {
     useSpecies,
     useVolumeComparisons,
     useHospitalComparisons,
+    useHospitalCatalog,
     useWaitTimeDaily,
     useWaitTimeBySpecies,
     useWaitTimeByProvince,
@@ -87,6 +88,7 @@ export const DashboardView = () => {
     const volumeComparisonMode: VolumeComparisonMode = duration === 'this_year' ? 'year' : 'month';
     const { data: comparisonData, isLoading: comparisonLoading } = useVolumeComparisons(filters, showVolumeComparisons || duration === 'this_year', volumeComparisonMode);
     const { data: hospitals, isLoading: hospitalsLoading } = useHospitals(filters);
+    const { data: hospitalCatalog, isLoading: hospitalCatalogLoading } = useHospitalCatalog(filters);
     const hospitalComparisonMode: HospitalComparisonMode | null = duration === 'all_time'
         ? null
         : duration === 'this_year'
@@ -115,7 +117,9 @@ export const DashboardView = () => {
     const { data: speciesOptions = [] } = useSpeciesFilterOptions();
 
     const codesNeedingLabels = useMemo(() => {
-        const currentHospitalCodes = hospitals?.map((hospital) => hospital.hospital_code) ?? [];
+        const currentHospitalCodes = hospitalCatalog?.map((hospital) => hospital.hospital_code)
+            ?? hospitals?.map((hospital) => hospital.hospital_code)
+            ?? [];
         if (!hospitalComparisons?.prevPeriodByHospital || !hospitals) {
             return currentHospitalCodes;
         }
@@ -157,7 +161,26 @@ export const DashboardView = () => {
             .map((row) => row.hospitalCode);
 
         return [...new Set([...currentHospitalCodes, ...decliningCodes])];
-    }, [hospitals, hospitalComparisons]);
+    }, [hospitalCatalog, hospitals, hospitalComparisons]);
+
+    const searchableHospitals = useMemo(() => {
+        const catalog = hospitalCatalog ?? hospitals ?? [];
+        const currentByCode = new Map((hospitals ?? []).map((hospital) => [hospital.hospital_code, hospital] as const));
+
+        return catalog.map((hospital) => {
+            const current = currentByCode.get(hospital.hospital_code);
+            if (!current) {
+                return hospital;
+            }
+            return {
+                ...hospital,
+                ...current,
+                hospital_internal_name: hospital.hospital_internal_name ?? current.hospital_internal_name,
+                province: hospital.province || current.province,
+                premium_tier: hospital.premium_tier ?? current.premium_tier
+            };
+        });
+    }, [hospitalCatalog, hospitals]);
 
     const { data: hospitalDisplayByCode, isLoading: hospitalDisplayLoading } = useHospitalDisplayByCode(
         filters,
@@ -422,6 +445,7 @@ export const DashboardView = () => {
                     <FullscreenFrame>
                         <StoreCheckInWidget
                             hospitals={hospitals}
+                            allHospitals={searchableHospitals}
                             comparisons={showHospitalComparisons ? hospitalComparisons : undefined}
                             displayByCode={hospitalDisplayByCode}
                             loading={
@@ -437,8 +461,9 @@ export const DashboardView = () => {
                     <FullscreenFrame>
                         <StoreList
                             hospitals={hospitals}
+                            searchHospitals={searchableHospitals}
                             displayByCode={hospitalDisplayByCode}
-                            loading={hospitalsLoading || (showHospitalComparisons && hospitalComparisonsLoading)}
+                            loading={hospitalsLoading || hospitalCatalogLoading || (showHospitalComparisons && hospitalComparisonsLoading)}
                             comparisons={showHospitalComparisons ? hospitalComparisons : undefined}
                             showComparisonColumns={showHospitalComparisons}
                             showPrevYearColumn={showHospitalPrevYear}

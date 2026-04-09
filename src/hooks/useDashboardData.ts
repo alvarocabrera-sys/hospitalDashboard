@@ -294,6 +294,30 @@ export const useHospitals = (filters: DashboardFilters) => {
     });
 };
 
+export const useHospitalCatalog = (filters: DashboardFilters) => {
+    return useQuery({
+        queryKey: ['hospital-catalog', serializeDashboardFilters(filters)],
+        queryFn: async () => {
+            const { data } = await axios.get<
+                {
+                    hospital_code: string;
+                    hospital_internal_name?: string | null;
+                    province: string;
+                    premium_tier?: string | null;
+                }[]
+            >(`${API_BASE}/hospitals/catalog`, { params: filters });
+            return data.map((d): HospitalData => ({
+                hospital_code: d.hospital_code,
+                hospital_internal_name: d.hospital_internal_name ?? null,
+                province: d.province,
+                premium_tier: d.premium_tier ?? null,
+                volume: 0,
+                transfers: 0
+            }));
+        }
+    });
+};
+
 export const usePremiumTierFilterOptions = () => {
     return useQuery({
         queryKey: ['premium-tier-options'],
