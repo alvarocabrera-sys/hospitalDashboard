@@ -75,14 +75,20 @@ export const StoreList = ({
             }
             return a.hospital_code.localeCompare(b.hospital_code) * multi;
         });
-    const maxVol = Math.max(0, ...sortedHospitals.map(s => Number(s.volume)));
+    const visibleHospitals = q ? sortedHospitals : sortedHospitals.slice(0, 10);
+    const subtitle = q
+        ? `Showing ${visibleHospitals.length} matching hospital${visibleHospitals.length === 1 ? '' : 's'}`
+        : sortField === 'volume' && sortDirection === 'desc'
+            ? 'Top 10 by volume'
+            : `Showing ${visibleHospitals.length} hospitals`;
+    const maxVol = Math.max(0, ...visibleHospitals.map(s => Number(s.volume)));
 
     return (
         <div className={`bg-brand-card border border-subtle rounded-xl overflow-hidden flex flex-col ${tableHeightClass} shadow-card`}>
             <div className="p-4 sm:p-6 border-b border-subtle flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                 <div>
                     <h3 className="text-base sm:text-lg font-medium text-fg-primary">Hospital Performance</h3>
-                    <p className="text-xs text-fg-muted mt-1">Top 10 by volume</p>
+                    <p className="text-xs text-fg-muted mt-1">{subtitle}</p>
                 </div>
                 <div className="relative w-full sm:w-auto">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-fg-muted" />
@@ -130,7 +136,7 @@ export const StoreList = ({
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-subtle">
-                        {sortedHospitals.map((hospital) => {
+                        {visibleHospitals.map((hospital) => {
                             const currentVolume = Number(hospital.volume);
                             const percentage = maxVol > 0 ? (currentVolume / maxVol) * 100 : 0;
                             const prevPeriodVolume = comparisons?.prevPeriodByHospital?.[hospital.hospital_code];
@@ -206,7 +212,7 @@ export const StoreList = ({
                                 </tr>
                             );
                         })}
-                        {sortedHospitals.length === 0 && (
+                        {visibleHospitals.length === 0 && (
                             <tr>
                                 <td colSpan={colSpan} className="px-4 sm:px-6 py-8 text-center text-fg-muted">
                                     No hospitals found

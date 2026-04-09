@@ -52,6 +52,7 @@ const filterChipClass =
     'flex shrink-0 items-center gap-2 bg-brand-card p-1 rounded-lg border border-subtle shadow-sm min-w-0 transition-dashboard hover:bg-brand-card-hover/50';
 const filterSelectClass =
     'bg-transparent border-none text-sm text-fg-primary focus:ring-0 cursor-pointer py-1.5 pl-2 pr-8 font-medium focus:text-brand-accent transition-dashboard min-w-[7.5rem] max-w-[14rem]';
+const HOSPITAL_CHECK_IN_MAX_ITEMS = 10;
 
 export const DashboardView = () => {
     const [duration, setDuration] = useState<DurationOption>('this_month');
@@ -114,15 +115,45 @@ export const DashboardView = () => {
     const { data: speciesOptions = [] } = useSpeciesFilterOptions();
 
     const codesNeedingLabels = useMemo(() => {
-        const s = new Set<string>();
-        hospitals?.forEach((h) => s.add(h.hospital_code));
-        if (hospitalComparisons?.prevPeriodByHospital) {
-            Object.keys(hospitalComparisons.prevPeriodByHospital).forEach((k) => s.add(k));
+        if (!hospitals || !hospitalComparisons?.prevPeriodByHospital) {
+            return [];
         }
-        if (hospitalComparisons?.prevYearByHospital) {
-            Object.keys(hospitalComparisons.prevYearByHospital).forEach((k) => s.add(k));
-        }
-        return [...s];
+
+        const currentByHospital = new Map<string, number>();
+        hospitals.forEach((hospital) => {
+            currentByHospital.set(hospital.hospital_code, Number(hospital.volume) || 0);
+        });
+
+        const hospitalCodes = new Set<string>([
+            ...Object.keys(hospitalComparisons.prevPeriodByHospital),
+            ...currentByHospital.keys()
+        ]);
+
+        return [...hospitalCodes]
+            .map((hospitalCode) => {
+                const current = currentByHospital.get(hospitalCode) ?? 0;
+                const prevPeriod = hospitalComparisons.prevPeriodByHospital[hospitalCode] ?? 0;
+                const prevYear = hospitalComparisons.prevYearByHospital?.[hospitalCode];
+                const dropVsPrev = prevPeriod - current;
+                const dropVsYear = typeof prevYear === 'number' && current < prevYear ? prevYear - current : 0;
+
+                return {
+                    hospitalCode,
+                    current,
+                    prevPeriod,
+                    dropVsPrev,
+                    dropVsYear
+                };
+            })
+            .filter((row) => row.prevPeriod > 0 && row.current < row.prevPeriod)
+            .sort((a, b) => {
+                if (b.dropVsPrev !== a.dropVsPrev) {
+                    return b.dropVsPrev - a.dropVsPrev;
+                }
+                return b.dropVsYear - a.dropVsYear;
+            })
+            .slice(0, HOSPITAL_CHECK_IN_MAX_ITEMS)
+            .map((row) => row.hospitalCode);
     }, [hospitals, hospitalComparisons]);
 
     const { data: hospitalDisplayByCode, isLoading: hospitalDisplayLoading } = useHospitalDisplayByCode(
@@ -397,7 +428,7 @@ export const DashboardView = () => {
                             }
                             comparisonLabel={hospitalPrevPeriodLabel}
                             yearLabel={showHospitalPrevYear ? hospitalPrevYearLabel : undefined}
-                            maxItems={10}
+                            maxItems={HOSPITAL_CHECK_IN_MAX_ITEMS}
                         />
                     </FullscreenFrame>
                     <FullscreenFrame>

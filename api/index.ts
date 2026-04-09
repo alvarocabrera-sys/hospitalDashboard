@@ -897,7 +897,6 @@ router.get('/hospitals', async (req, res) => {
             ${where.text} 
             GROUP BY ${hospitalEntityGroupExpr}
             ORDER BY COUNT(*) DESC
-            LIMIT 10
         `;
         const result = await client.query(query, where.values);
         res.json(result.rows);
